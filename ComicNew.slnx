@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ComicNew.Api/ComicNew.Api.csproj" />
+    <Project Path="src/ComicNew.Application/ComicNew.Application.csproj" />
+    <Project Path="src/ComicNew.Domain/ComicNew.Domain.csproj" />
+    <Project Path="src/ComicNew.Infrastructure/ComicNew.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ComicNew.IntegrationTests/ComicNew.IntegrationTests.csproj" />
+    <Project Path="tests/ComicNew.UnitTests/ComicNew.UnitTests.csproj" />
+  </Folder>
+</Solution>

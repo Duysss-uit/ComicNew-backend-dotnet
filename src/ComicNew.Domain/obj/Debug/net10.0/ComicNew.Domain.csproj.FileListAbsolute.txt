@@ -1,0 +1,11 @@
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\bin\Debug\net10.0\ComicNew.Domain.deps.json
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\bin\Debug\net10.0\ComicNew.Domain.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\bin\Debug\net10.0\ComicNew.Domain.pdb
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\ComicNew.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\ComicNew.Domain.AssemblyInfoInputs.cache
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\ComicNew.Domain.AssemblyInfo.cs
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\ComicNew.Domain.csproj.CoreCompileInputs.cache
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\ComicNew.Domain.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\refint\ComicNew.Domain.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\ComicNew.Domain.pdb
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Domain\obj\Debug\net10.0\ref\ComicNew.Domain.dll
