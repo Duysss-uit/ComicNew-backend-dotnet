@@ -123,3 +123,17 @@ C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Microsoft.OpenApi.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\obj\Debug\net10.0\ComicNew.Api.MvcApplicationPartsAssemblyInfo.cs
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Api\obj\Debug\net10.0\ComicNew.Api.sourcelink.json

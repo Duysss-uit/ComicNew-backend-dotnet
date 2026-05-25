@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ComicNew.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a4281ac275de1725c233cbf00607c79d75367de3")]
 [assembly: System.Reflection.AssemblyProductAttribute("ComicNew.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ComicNew.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

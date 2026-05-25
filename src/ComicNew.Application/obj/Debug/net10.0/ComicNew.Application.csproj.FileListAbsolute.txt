@@ -13,3 +13,4 @@ C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Application\obj\D
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Application\obj\Debug\net10.0\refint\ComicNew.Application.dll
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Application\obj\Debug\net10.0\ComicNew.Application.pdb
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Application\obj\Debug\net10.0\ref\ComicNew.Application.dll
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Application\obj\Debug\net10.0\ComicNew.Application.sourcelink.json

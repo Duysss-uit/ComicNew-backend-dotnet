@@ -17,3 +17,4 @@ C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Infrastructure\ob
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Infrastructure\obj\Debug\net10.0\ref\ComicNew.Infrastructure.dll
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Infrastructure\bin\Debug\net10.0\ComicNew.Infrastructure.runtimeconfig.json
 C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Infrastructure\obj\Debug\net10.0\ComicNew.Infrastructure.genruntimeconfig.cache
+C:\y0utube\Project\BackendComicNew\backend-dotnet\src\ComicNew.Infrastructure\obj\Debug\net10.0\ComicNew.Infrastructure.sourcelink.json
