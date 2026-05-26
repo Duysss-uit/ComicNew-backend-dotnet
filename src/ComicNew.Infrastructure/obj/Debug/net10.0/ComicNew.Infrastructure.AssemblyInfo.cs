@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ComicNew.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b0fa8636588b67d209ebf4c02127e2f0052b76be")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b781f3f31f482eccf61e9c3d2c1511c47bb5c137")]
 [assembly: System.Reflection.AssemblyProductAttribute("ComicNew.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ComicNew.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
