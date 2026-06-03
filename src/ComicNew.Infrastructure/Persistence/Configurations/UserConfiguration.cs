@@ -18,14 +18,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.Property(u => u.PasswordHash)
-            .IsRequired()
-            .HasMaxLength(500);
+        builder.Property(u => u.SupabaseUserId);
 
         builder.Property(u => u.AvatarUrl)
             .HasMaxLength(2048);
 
         builder.HasIndex(u => u.Email)
+            .IsUnique();
+
+        builder.HasIndex(u => u.SupabaseUserId)
             .IsUnique();
 
         builder.HasMany(u => u.Stories)

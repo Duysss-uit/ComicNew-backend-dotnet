@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using ComicNew.Application.Interfaces;
 using ComicNew.Infrastructure.Persistence;
+using ComicNew.Infrastructure.Services;
 
 LoadDotEnv();
 
@@ -23,6 +25,7 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 
 // CORS
 builder.Services.AddCors(options =>
