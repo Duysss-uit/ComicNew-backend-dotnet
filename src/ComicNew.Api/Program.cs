@@ -55,6 +55,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
         options.RequireHttpsMetadata = builder.Environment.IsProduction();
+
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                if (context.Principal is null)
+                {
+                    return;
+                }
+
+                var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+                var logger = loggerFactory.CreateLogger("UserSync");
+
+                try
+                {
+                    var userSync = context.HttpContext.RequestServices.GetRequiredService<IUserSyncService>();
+                    var user = await userSync.GetOrCreateUserAsync(context.Principal, context.HttpContext.RequestAborted);
+                    logger.LogInformation("User sync completed for {Email} ({SupabaseUserId})", user.Email, user.SupabaseUserId);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "User sync failed during token validation.");
+                }
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
