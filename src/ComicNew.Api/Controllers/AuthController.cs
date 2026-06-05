@@ -11,12 +11,10 @@ namespace ComicNew.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserSyncService _userSyncService;
-        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IUserSyncService userSyncService, ILogger<AuthController> logger)
+        public AuthController(IUserSyncService userSyncService)
         {
             _userSyncService = userSyncService;
-            _logger = logger;
         }
 
         [HttpGet("me")]
@@ -24,14 +22,7 @@ namespace ComicNew.Api.Controllers
         {
             ComicNew.Domain.Entities.User? syncedUser = null;
 
-            try
-            {
-                syncedUser = await _userSyncService.GetOrCreateUserAsync(User, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "User sync failed while handling /api/auth/me.");
-            }
+            syncedUser = await _userSyncService.GetOrCreateUserAsync(User, cancellationToken);
 
             var userId = User.FindFirstValue("sub")
                 ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
