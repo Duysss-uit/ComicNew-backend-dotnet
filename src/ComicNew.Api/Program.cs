@@ -22,8 +22,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173",
-                            "https://comic-new.vercel.app")
+        policy.SetIsOriginAllowed(IsAllowedCorsOrigin)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -132,4 +131,22 @@ static void LoadDotEnv()
             Environment.SetEnvironmentVariable(key, value);
         }
     }
+}
+
+static bool IsAllowedCorsOrigin(string origin)
+{
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return false;
+    }
+
+    if (uri.Scheme == Uri.UriSchemeHttp && uri.Host is "localhost" or "127.0.0.1")
+    {
+        return true;
+    }
+
+    return uri.Scheme == Uri.UriSchemeHttps
+        && (uri.Host == "comic-new.vercel.app"
+            || (uri.Host.StartsWith("comic-new-", StringComparison.OrdinalIgnoreCase)
+                && uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase)));
 }
