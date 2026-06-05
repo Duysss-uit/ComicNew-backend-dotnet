@@ -1,2 +1,6 @@
 appsetting.json
 .env
+**/bin/
+**/obj/
+.agents/
+artifacts/
