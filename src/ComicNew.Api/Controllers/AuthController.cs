@@ -11,24 +11,46 @@ namespace ComicNew.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserSyncService _userSyncService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IUserSyncService userSyncService)
+        public AuthController(IUserSyncService userSyncService, ILogger<AuthController> logger)
         {
             _userSyncService = userSyncService;
+            _logger = logger;
         }
 
         [HttpGet("me")]
         public async Task<IActionResult> GetMe(CancellationToken cancellationToken)
         {
-            var syncedUser = await _userSyncService.GetOrCreateUserAsync(User, cancellationToken);
+            ComicNew.Domain.Entities.User? syncedUser = null;
+
+            try
+            {
+                syncedUser = await _userSyncService.GetOrCreateUserAsync(User, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "User sync failed while handling /api/auth/me.");
+            }
+
             var userId = User.FindFirstValue("sub")
                 ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? syncedUser.SupabaseUserId?.ToString()
-                ?? syncedUser.Id.ToString();
+                ?? syncedUser?.SupabaseUserId?.ToString()
+                ?? syncedUser?.Id.ToString();
             var email = User.FindFirstValue("email")
                 ?? User.FindFirstValue(ClaimTypes.Email)
-                ?? syncedUser.Email;
-            var role = User.FindFirstValue("role") ?? syncedUser.Role;
+                ?? syncedUser?.Email;
+            var role = User.FindFirstValue("role") ?? syncedUser?.Role;
+            var name = syncedUser?.FullName
+                ?? User.FindFirstValue("full_name")
+                ?? User.FindFirstValue("name")
+                ?? email?.Split('@')[0]
+                ?? "User";
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new { message = "Token does not contain a valid user id." });
+            }
 
             var claims = User.Claims.Select(c => new { c.Type, c.Value });
             return Ok(new
@@ -36,8 +58,8 @@ namespace ComicNew.Api.Controllers
                 UserId = userId,
                 Email = email,
                 Role = role,
-                Name = syncedUser.FullName,
-                AvatarUrl = syncedUser.AvatarUrl,
+                Name = name,
+                AvatarUrl = syncedUser?.AvatarUrl,
                 Claims = claims
             });
             
