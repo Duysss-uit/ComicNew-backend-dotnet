@@ -38,27 +38,8 @@ public class UserSyncService : IUserSyncService
             u => u.SupabaseUserId == supabaseUserId,
             cancellationToken);
 
-        if (user is null && !string.IsNullOrWhiteSpace(email))
-        {
-            user = await _db.Users.FirstOrDefaultAsync(
-                u => u.Email == email,
-                cancellationToken);
-        }
-
         if (user is not null)
         {
-            if (user.SupabaseUserId.HasValue && user.SupabaseUserId.Value != supabaseUserId)
-            {
-                throw new InvalidOperationException("Email is already linked to another Supabase user.");
-            }
-
-            user.SupabaseUserId ??= supabaseUserId;
-            user.Email = email ?? user.Email;
-            user.FullName = string.IsNullOrWhiteSpace(fullName) ? user.FullName : fullName;
-            user.AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? user.AvatarUrl : avatarUrl;
-            user.LastLoginAt = DateTime.UtcNow;
-            await _db.SaveChangesAsync(cancellationToken);
-
             return user;
         }
 
