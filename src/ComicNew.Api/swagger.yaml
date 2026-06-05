@@ -25,10 +25,10 @@ components:
 paths:
   /api/auth/me:
     get:
-      summary: Lấy thông tin user hiện tại (từ claims)
+      summary: Lấy thông tin user hiện tại
       description: |
-        Endpoint trả thông tin user dựa trên token (claims). Frontend phải gửi header `Authorization: Bearer <token>`.
-        Nếu muốn dữ liệu profile đầy đủ (từ DB) có thể mở rộng endpoint để truy vấn bản ghi user.
+        Endpoint xác thực token Supabase, đồng bộ user vào DB, rồi trả thông tin profile hiện tại.
+        Frontend phải gửi header `Authorization: Bearer <token>`.
 
         Ví dụ fetch từ frontend:
 
@@ -57,6 +57,11 @@ paths:
                     type: string
                     nullable: true
                   Role:
+                    type: string
+                    nullable: true
+                  Name:
+                    type: string
+                  AvatarUrl:
                     type: string
                     nullable: true
                   Claims:

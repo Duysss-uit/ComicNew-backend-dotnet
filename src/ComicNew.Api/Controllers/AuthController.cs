@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 using System.Security.Claims;
+using ComicNew.Application.Interfaces;
  
 namespace ComicNew.Api.Controllers
 {
@@ -10,12 +10,25 @@ namespace ComicNew.Api.Controllers
     [Authorize]
     public class AuthController : ControllerBase
     {
-        [HttpGet("me")]
-        public IActionResult GetMe()
+        private readonly IUserSyncService _userSyncService;
+
+        public AuthController(IUserSyncService userSyncService)
         {
-            var userId = User.FindFirstValue("sub");
-            var email = User.FindFirstValue("email");
-            var role = User.FindFirstValue("role");
+            _userSyncService = userSyncService;
+        }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMe(CancellationToken cancellationToken)
+        {
+            var syncedUser = await _userSyncService.GetOrCreateUserAsync(User, cancellationToken);
+            var userId = User.FindFirstValue("sub")
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? syncedUser.SupabaseUserId?.ToString()
+                ?? syncedUser.Id.ToString();
+            var email = User.FindFirstValue("email")
+                ?? User.FindFirstValue(ClaimTypes.Email)
+                ?? syncedUser.Email;
+            var role = User.FindFirstValue("role") ?? syncedUser.Role;
 
             var claims = User.Claims.Select(c => new { c.Type, c.Value });
             return Ok(new
@@ -23,6 +36,8 @@ namespace ComicNew.Api.Controllers
                 UserId = userId,
                 Email = email,
                 Role = role,
+                Name = syncedUser.FullName,
+                AvatarUrl = syncedUser.AvatarUrl,
                 Claims = claims
             });
             

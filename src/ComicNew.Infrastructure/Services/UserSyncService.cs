@@ -17,8 +17,10 @@ public class UserSyncService : IUserSyncService
 
     public async Task<User> GetOrCreateUserAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
     {
-        var supabaseId = principal.FindFirst("sub")?.Value;
-        var email = principal.FindFirst("email")?.Value;
+        var supabaseId = principal.FindFirst("sub")?.Value
+            ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var email = principal.FindFirst("email")?.Value
+            ?? principal.FindFirst(ClaimTypes.Email)?.Value;
         var fullName = principal.FindFirst("user_metadata.full_name")?.Value
             ?? principal.FindFirst("full_name")?.Value
             ?? email
