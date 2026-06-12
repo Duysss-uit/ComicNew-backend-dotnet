@@ -4,3 +4,5 @@ appsetting.json
 **/obj/
 .agents/
 artifacts/
+.github/
+.gitignore
