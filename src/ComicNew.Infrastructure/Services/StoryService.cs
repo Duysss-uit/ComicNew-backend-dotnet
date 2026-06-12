@@ -2,6 +2,7 @@ using ComicNew.Infrastructure.Persistence;
 using ComicNew.Application.Interfaces;
 using ComicNew.Application.DTOs.Chapters;
 using ComicNew.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 namespace ComicNew.Infrastructure.Services;
 public class StoryService : IStoryService
 {
@@ -30,13 +31,16 @@ public class StoryService : IStoryService
         return newStory;
     }
 
-    public Task<Story?> GetStoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Story?> GetStoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var story = await _db.Stories.FirstOrDefaultAsync(
+            s => s.Id == id,
+            cancellationToken);
+        return story;
     }
 
-    public Task<List<Story>> GetStoriesAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Story>> GetStoriesAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await _db.Stories.OrderByDescending(s => s.CreatedAt).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
     }
 }
