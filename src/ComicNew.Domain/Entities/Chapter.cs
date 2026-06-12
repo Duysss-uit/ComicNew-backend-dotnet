@@ -13,4 +13,5 @@ public class Chapter : BaseEntity
     public DateTime PublishedAt { get; set; }
     public Story Story { get; set; } = null!;
     public Guid StoryId { get; set; }
+    public string? Content { get; set; }
 }
