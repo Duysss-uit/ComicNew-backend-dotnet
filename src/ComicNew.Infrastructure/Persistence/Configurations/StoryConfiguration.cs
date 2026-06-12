@@ -23,9 +23,15 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
 
         builder.Property(s => s.Tags)
             .HasColumnType("text[]");
+            
         builder.Property(s => s.Status)
             .IsRequired()
             .HasConversion<string>();
+
+        builder.Property(s => s.Type)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasDefaultValue(StoryType.Comic);
 
         builder.Property(s => s.Views)
             .HasDefaultValue(0);

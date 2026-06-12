@@ -20,6 +20,9 @@ public class ChapterConfiguration : IEntityTypeConfiguration<Chapter>
         builder.Property(c => c.ImageUrls)
             .HasColumnType("text[]");
 
+        builder.Property(c => c.Content)
+            .HasColumnType("text");
+            
         builder.Property(c => c.Views)
             .HasDefaultValue(0);
 
@@ -32,5 +35,6 @@ public class ChapterConfiguration : IEntityTypeConfiguration<Chapter>
             .WithMany(s => s.Chapters)
             .HasForeignKey(c => c.StoryId)
             .OnDelete(DeleteBehavior.Cascade);
+        
     }
 }
