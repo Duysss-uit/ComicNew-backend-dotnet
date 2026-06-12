@@ -1,5 +1,5 @@
 using ComicNew.Domain.Entities;
-using ComicNew.Application.DTOs.Chapters;
+using ComicNew.Application.DTOs.Stories;
 public interface IStoryService
 {
     Task<Story> CreateStoryAsync(CreateStoryRequest request, Guid authorId, CancellationToken cancellationToken = default);

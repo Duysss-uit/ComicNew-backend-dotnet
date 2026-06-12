@@ -1,5 +1,5 @@
 using ComicNew.Domain.Enums;
-namespace ComicNew.Application.DTOs.Chapters;
+namespace ComicNew.Application.DTOs.Stories;
 public class CreateStoryRequest
 {
     public string Title { get; set; } = string.Empty;

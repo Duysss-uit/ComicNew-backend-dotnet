@@ -1,6 +1,6 @@
 using ComicNew.Infrastructure.Persistence;
 using ComicNew.Application.Interfaces;
-using ComicNew.Application.DTOs.Chapters;
+using ComicNew.Application.DTOs.Stories;
 using ComicNew.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 namespace ComicNew.Infrastructure.Services;
