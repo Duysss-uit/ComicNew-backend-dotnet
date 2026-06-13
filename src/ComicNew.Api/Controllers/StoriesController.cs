@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ComicNew.Application.DTOs.Stories;
 using ComicNew.Application.Interfaces;
+using ComicNew.Application.Constants;
 using Microsoft.AspNetCore.Authorization;
+using ComicNew.Infrastructure.Services;
 namespace ComicNew.Api.Controllers
 {
     [ApiController]
@@ -10,10 +12,14 @@ namespace ComicNew.Api.Controllers
     {
         private readonly IStoryService _storyService;
         private readonly ILogger<StoriesController> _logger;
+        private readonly IStorageService _storageService;
+        private readonly IUserSyncService _userSyncService;
 
-        public StoriesController(IStoryService storyService, ILogger<StoriesController> logger)
+        public StoriesController(IStoryService storyService, ILogger<StoriesController> logger, IStorageService storageService, IUserSyncService userSyncService)
         {
             _storyService = storyService;
+            _storageService = storageService;
+            _userSyncService = userSyncService;
             _logger = logger;
         }
         [HttpGet("{storyId}")]
@@ -36,11 +42,17 @@ namespace ComicNew.Api.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateStory(CreateStoryRequest request, IUserSyncService userSyncService, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateStory([FromForm]CreateStoryRequest request, IFormFile? coverFile, CancellationToken cancellationToken)
         {
             try
             {
-                var story = await _storyService.CreateStoryAsync(request, Guid.NewGuid(), cancellationToken);
+                var user = await _userSyncService.GetOrCreateUserAsync(User);
+                if(coverFile != null)
+                {
+                    var coverUrl = await _storageService.UploadAsync(coverFile.OpenReadStream(), coverFile.FileName, StorageBuckets.Cover, "covers", cancellationToken);
+                    request.CoverUrl = coverUrl;
+                }
+                var story = await _storyService.CreateStoryAsync(request, user.Id, cancellationToken);
                 return CreatedAtAction(nameof(GetStory), new { storyId = story.Id }, story);
             }
             catch (Exception ex)
