@@ -6,4 +6,5 @@ public class CreateChapterRequest
     public int ChapterNumber { get; set; }
     public List<string>? ImageUrls { get; set; } = new List<string>();
     public Guid StoryId { get; set; } = Guid.Empty;
+    public string? Content { get; set; }
 }

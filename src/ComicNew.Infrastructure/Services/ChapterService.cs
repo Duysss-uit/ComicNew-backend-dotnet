@@ -20,9 +20,11 @@ public class ChapterService : IChapterService
             Title = request.Title,
             ChapterNumber = request.ChapterNumber,
             ImageUrls = request.ImageUrls ?? new List<string>(),
+            Content = request.Content ?? string.Empty,
             StoryId = request.StoryId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
+            
         };
         _db.Chapters.Add(newChapter);
         await _db.SaveChangesAsync(cancellationToken);

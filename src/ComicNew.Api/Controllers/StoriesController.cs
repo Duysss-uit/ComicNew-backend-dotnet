@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ComicNew.Application.DTOs.Stories;
+using ComicNew.Application.DTOs.Chapters;
 using ComicNew.Application.Interfaces;
 using ComicNew.Application.Constants;
 using Microsoft.AspNetCore.Authorization;
-using ComicNew.Infrastructure.Services;
 namespace ComicNew.Api.Controllers
 {
     [ApiController]
@@ -42,7 +42,7 @@ namespace ComicNew.Api.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateStory([FromForm]CreateStoryRequest request, IFormFile? coverFile, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateStory([FromForm]CreateStoryRequest request, IFormFile? coverFile, List<IFormFile> chapterFiles, CancellationToken cancellationToken)
         {
             try
             {
