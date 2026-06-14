@@ -21,6 +21,125 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    Story:
+      type: object
+      properties:
+        Id:
+          type: string
+          format: uuid
+        Title:
+          type: string
+        Description:
+          type: string
+        CoverUrl:
+          type: string
+        Tags:
+          type: array
+          items:
+            type: string
+        Status:
+          type: string
+          description: Giá trị chuỗi của StoryStatus, ví dụ Ongoing
+        Views:
+          type: integer
+          format: int32
+        Rating:
+          type: number
+          format: double
+        LastChapterAt:
+          type: string
+          format: date-time
+        Type:
+          type: string
+          description: Giá trị enum StoryType, ví dụ Comic
+        AuthorId:
+          type: string
+          format: uuid
+    Chapter:
+      type: object
+      properties:
+        Id:
+          type: string
+          format: uuid
+        Title:
+          type: string
+        ChapterNumber:
+          type: integer
+          format: int32
+        ImageUrls:
+          type: array
+          items:
+            type: string
+        Views:
+          type: integer
+          format: int32
+        PublishedAt:
+          type: string
+          format: date-time
+        StoryId:
+          type: string
+          format: uuid
+        Content:
+          type: string
+          nullable: true
+    CreateStoryForm:
+      type: object
+      required:
+        - Title
+      properties:
+        Title:
+          type: string
+          example: One Piece
+        Description:
+          type: string
+          example: Hành trình của Luffy đi tìm kho báu One Piece.
+        Tags:
+          type: array
+          items:
+            type: string
+          example: ["shonen", "adventure", "pirate"]
+        Type:
+          type: string
+          enum: [Comic, Novel]
+          example: Comic
+        Status:
+          type: string
+          enum: [Ongoing, Completed, Hiatus]
+          example: Ongoing
+        coverFile:
+          type: string
+          format: binary
+          description: File cover tuỳ chọn; backend sẽ upload và gán CoverUrl.
+        chapterFiles:
+          type: array
+          items:
+            type: string
+            format: binary
+          description: Trường hiện được controller nhận nhưng chưa dùng để tạo chapter.
+    CreateChapterForm:
+      type: object
+      required:
+        - Title
+        - ChapterNumber
+        - StoryId
+      properties:
+        Title:
+          type: string
+          example: Chapter 1
+        ChapterNumber:
+          type: integer
+          format: int32
+          example: 1
+        StoryId:
+          type: string
+          format: uuid
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+          description: Danh sách file trang truyện; backend upload và sinh ImageUrls/Content.
 
 paths:
   /api/auth/me:
@@ -76,6 +195,223 @@ paths:
         '401':
           description: Unauthorized — token missing or invalid
 
+  /api/stories:
+    get:
+      summary: Lấy danh sách truyện
+      description: Trả về danh sách truyện theo phân trang `page` và `pageSize`.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Trang hiện tại
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Số phần tử mỗi trang
+      responses:
+        '200':
+          description: Danh sách truyện
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Story'
+        '500':
+          description: Lỗi server khi lấy danh sách truyện
+    post:
+      summary: Tạo truyện mới
+      description: |
+        Endpoint tạo truyện mới, yêu cầu đăng nhập. Gửi dưới dạng `multipart/form-data`.
+
+        Frontend thường truyền `Title`, `Description`, `Tags`, `Type`, `Status` và có thể kèm `coverFile`.
+        Backend sẽ upload `coverFile` lên storage nếu có và tự gán `CoverUrl`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateStoryForm'
+      responses:
+        '201':
+          description: Truyện đã được tạo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Story'
+        '401':
+          description: Unauthorized — token missing or invalid
+        '500':
+          description: Lỗi server khi tạo truyện
+
+  /api/stories/{storyId}:
+    get:
+      summary: Lấy chi tiết truyện
+      description: Trả về thông tin truyện theo `storyId`.
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Id của truyện
+      responses:
+        '200':
+          description: Chi tiết truyện
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Story'
+        '404':
+          description: Không tìm thấy truyện
+        '500':
+          description: Lỗi server khi lấy truyện
+
+  /api/stories/{storyId}/chapters:
+    post:
+      summary: Upload chapter mới cho truyện
+      description: |
+        Endpoint upload chapter, yêu cầu đăng nhập. Gửi dưới dạng `multipart/form-data`.
+
+        Luồng xử lý trong controller:
+        1. Đồng bộ/lấy user hiện tại từ token.
+        2. Dùng `storyId` trên URL làm nguồn sự thật cho truyện.
+        3. Kiểm tra quyền author.
+        4. Upload file trang truyện và tạo chapter.
+
+      operationId: UploadChapter
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Id truyện trên URL.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateChapterForm'
+      responses:
+        '201':
+          description: Chapter đã được tạo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+        '401':
+          description: Unauthorized — token missing or invalid
+        '403':
+          description: Người dùng không có quyền upload chapter cho truyện này
+        '404':
+          description: Không tìm thấy truyện
+        '500':
+          description: Lỗi server khi upload chapter
+
+  /api/stories/{storyId}/chapters/{chapterId}:
+    get:
+      summary: Lấy chi tiết chapter
+      description: Trả về thông tin chapter theo `chapterId`.
+      operationId: GetChapter
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Id truyện trên URL gốc.
+        - in: path
+          name: chapterId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Id chapter.
+      responses:
+        '200':
+          description: Chi tiết chapter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+        '404':
+          description: Không tìm thấy chapter
+        '500':
+          description: Lỗi server khi lấy chapter
+    delete:
+      summary: Xoá chapter
+      description: Xoá chapter theo `chapterId`. Yêu cầu đăng nhập và chỉ author của truyện mới được xoá.
+      operationId: DeleteChapter
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Id truyện trên URL gốc.
+        - in: path
+          name: chapterId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Id chapter.
+      responses:
+        '204':
+          description: Chapter đã được xoá
+        '401':
+          description: Unauthorized — token missing or invalid
+        '403':
+          description: Người dùng không có quyền xoá chapter này
+        '404':
+          description: Không tìm thấy chapter hoặc truyện
+        '500':
+          description: Lỗi server khi xoá chapter
+
+  /api/stories/{storyId}/chapters:
+    get:
+      summary: Lấy danh sách chapter theo truyện
+      description: |
+        Trả về danh sách chapter của truyện.
+        Tương ứng với action `[HttpGet]` trong `ChapterController`.
+      operationId: GetChaptersByStory
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Story id từ base route `api/stories/{storyId}/chapters`.
+      responses:
+        '200':
+          description: Danh sách chapter của truyện
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chapter'
+        '500':
+          description: Lỗi server khi lấy danh sách chapter
+
   /api/health:
     get:
       summary: Health check
@@ -103,3 +439,6 @@ x-notes: |
   - Middleware JwtBearer lấy metadata từ Supabase (`Supabase:Url`) để xác thực token.
   - `OnTokenValidated` trong `Program.cs` gọi `IUserSyncService.GetOrCreateUserAsync` để đảm bảo user tồn tại trong DB.
   - Nếu bạn muốn chặn request khi sync user thất bại: trong `OnTokenValidated` gọi `context.Fail("reason")`.
+  - `POST /api/stories` nhận multipart form; `coverFile` là tuỳ chọn, còn `chapterFiles` hiện được action nhận nhưng chưa dùng trong logic tạo truyện.
+  - `POST /api/stories/{storyId}/chapters` cần `Title`, `ChapterNumber`, `StoryId` và danh sách file trang truyện trong field `files`.
+  - `storyId` trên URL là nguồn sự thật cho chapter routes; form body nếu có `StoryId` sẽ được kiểm tra khớp với route.

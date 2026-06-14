@@ -1,40 +1,41 @@
 using Microsoft.AspNetCore.Mvc;
 using ComicNew.Application.DTOs.Chapters;
 using ComicNew.Application.Interfaces;
-using ComicNew.Application.Constants;
 using Microsoft.AspNetCore.Authorization;
-using DocumentFormat.OpenXml.Packaging;
-using UglyToad.PdfPig;
 namespace ComicNew.Api.Controllers
 {
     [ApiController]
-    [Route("api/chapters")]
+    [Route("api/stories/{storyId}/chapters")]
     public class ChapterController : ControllerBase
     {
         private readonly IChapterService _chapterService;
         private readonly IUserSyncService _userSyncService;
-        private readonly IStorageService _storageService;
         private readonly IStoryService _storyService;
         private readonly IChapterUploadService _chapterUploadService;
         private readonly ILogger<ChapterController> _logger;
 
-        public ChapterController(IChapterService chapterService, ILogger<ChapterController> logger, IStorageService storageService, IUserSyncService userSyncService, IStoryService storyService, IChapterUploadService chapterUploadService)
+        public ChapterController(IChapterService chapterService, ILogger<ChapterController> logger, IUserSyncService userSyncService, IStoryService storyService, IChapterUploadService chapterUploadService)
         {
             _chapterService = chapterService;
-            _logger = logger;
-            _storageService = storageService;
+            _logger = logger;   
             _userSyncService = userSyncService;
             _storyService = storyService;
             _chapterUploadService = chapterUploadService;
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadChapter([FromForm] CreateChapterRequest request, List<IFormFile> files, CancellationToken cancellationToken)
+        public async Task<IActionResult> UploadChapter(Guid storyId, [FromForm] CreateChapterRequest request, List<IFormFile> files, CancellationToken cancellationToken)
         {
             try
             {
+                if (request.StoryId != Guid.Empty && request.StoryId != storyId)
+                {
+                    return BadRequest(new { message = "StoryId in form data does not match the route storyId." });
+                }
+
+                request.StoryId = storyId;
                 var user = await _userSyncService.GetOrCreateUserAsync(User);
-                var story = await _storyService.GetStoryByIdAsync(request.StoryId);
+                var story = await _storyService.GetStoryByIdAsync(storyId);
                 if(story == null)
                 {
                     return NotFound(new { message = "Story not found." });
@@ -43,16 +44,85 @@ namespace ComicNew.Api.Controllers
                 {
                     return Forbid();
                 }
-                var uploadResult = await _chapterUploadService.UploadChapterAsync(request.StoryId, request.ChapterNumber, request.Title, story.Type, files, cancellationToken);
+                var uploadResult = await _chapterUploadService.UploadChapterAsync(storyId, request.ChapterNumber, request.Title, story.Type, files, cancellationToken);
                 request.ImageUrls = uploadResult.ImageUrls;
                 request.Content = uploadResult.Content;
                 var chapter = await _chapterService.CreateChapterAsync(request);
-                return CreatedAtAction(nameof(UploadChapter), new { id = chapter.Id }, chapter);
+                return CreatedAtAction(nameof(GetChapter), new { storyId, chapterId = chapter.Id }, chapter);
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex, "Error uploading chapter");
                 return StatusCode(500, new { message = "An error occurred while uploading the chapter." });
+            }
+        }
+        [HttpGet("{chapterId}")]
+        public async Task<IActionResult> GetChapter(Guid storyId, Guid chapterId)
+        {
+            try{
+                var chapter = await _chapterService.GetChapterByIdAsync(chapterId);
+                if (chapter == null)
+                {
+                    return NotFound(new { message = "Chapter not found." });
+                }
+                if (chapter.StoryId != storyId)
+                {
+                    return NotFound(new { message = "Chapter not found." });
+                }
+                return Ok(chapter);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching chapter {ChapterId}", chapterId);
+                return StatusCode(500, new { message = "An error occurred while fetching the chapter." });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetChaptersByStory(Guid storyId)
+        {
+            try
+            {
+                var chapters = await _chapterService.GetChapterByStoryIdAsync(storyId);
+                return Ok(chapters);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching chapters for story {StoryId}", storyId);
+                return StatusCode(500, new { message = "An error occurred while fetching the chapters." });
+            }
+        }
+        [HttpDelete("{chapterId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteChapter(Guid storyId, Guid chapterId)
+        {
+            try
+            {
+                var chapter = await _chapterService.GetChapterByIdAsync(chapterId);
+                if (chapter == null)
+                {
+                    return NotFound(new { message = "Chapter not found." });
+                }
+                if (chapter.StoryId != storyId)
+                {
+                    return NotFound(new { message = "Chapter not found." });
+                }
+                var user = await _userSyncService.GetOrCreateUserAsync(User);
+                var story = await _storyService.GetStoryByIdAsync(chapter.StoryId);
+                if(story == null)
+                {
+                    return NotFound(new { message = "Story not found." });
+                }
+                if(story.AuthorId != user.Id)
+                {
+                    return Forbid();
+                }
+                await _chapterService.DeleteChapterAsync(chapterId);
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting chapter {ChapterId}", chapterId);
+                return StatusCode(500, new { message = "An error occurred while deleting the chapter." });
             }
         }
     }
