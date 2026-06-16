@@ -103,6 +103,12 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+builder.Services.AddScoped<IStoryService, StoryService>();
+builder.Services.AddScoped<IChapterService, ChapterService>();
+builder.Services.AddScoped<IChapterUploadService, ChapterUploadService>();
+builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
+builder.Services.AddScoped<IUserSyncService, UserSyncService>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
