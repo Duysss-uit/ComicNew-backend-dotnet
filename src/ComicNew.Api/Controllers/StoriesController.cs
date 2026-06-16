@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using ComicNew.Application.DTOs.Stories;
-using ComicNew.Application.DTOs.Chapters;
 using ComicNew.Application.Interfaces;
 using ComicNew.Application.Constants;
 using Microsoft.AspNetCore.Authorization;
