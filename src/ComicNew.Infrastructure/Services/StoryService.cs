@@ -29,6 +29,7 @@ public class StoryService : IStoryService
         };
         _db.Stories.Add(newStory);
         await _db.SaveChangesAsync(cancellationToken);
+        var author = await _db.Users.FindAsync(authorId);
         return new StoryResponseDto
         {
             Id = newStory.Id,
