@@ -76,11 +76,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+builder.Services.AddSingleton<Supabase.Client>(provider =>
+{
+    var url = builder.Configuration["Supabase:Url"] 
+        ?? throw new InvalidOperationException("Supabase:Url is missing");
+    var key = builder.Configuration["Supabase:Key"] 
+        ?? throw new InvalidOperationException("Supabase:Key is missing");
+    
+    return new Supabase.Client(url, key, new Supabase.SupabaseOptions
+    {
+        AutoConnectRealtime = false
+    });
+});
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IChapterService, ChapterService>();
 builder.Services.AddScoped<IChapterUploadService, ChapterUploadService>();
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
+
 
 var app = builder.Build();
 
