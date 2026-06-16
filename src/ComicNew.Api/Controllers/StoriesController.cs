@@ -42,7 +42,7 @@ namespace ComicNew.Api.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateStory([FromForm]CreateStoryRequest request, IFormFile? coverFile, List<IFormFile> chapterFiles, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateStory([FromForm]CreateStoryRequest request, IFormFile? coverFile, CancellationToken cancellationToken)
         {
             try
             {
