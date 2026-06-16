@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ComicNew.Application.DTOs.Chapters;
 using ComicNew.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using ComicNew.Application.DTOs.Stories;
 namespace ComicNew.Api.Controllers
 {
     [ApiController]
@@ -40,7 +41,7 @@ namespace ComicNew.Api.Controllers
                 {
                     return NotFound(new { message = "Story not found." });
                 }
-                if(story.AuthorId != user.Id)
+                if( story.Author == null || story.Author.Id != user.Id )
                 {
                     return Forbid();
                 }
@@ -112,7 +113,7 @@ namespace ComicNew.Api.Controllers
                 {
                     return NotFound(new { message = "Story not found." });
                 }
-                if(story.AuthorId != user.Id)
+                if(story.Author == null || story.Author.Id != user.Id)
                 {
                     return Forbid();
                 }
