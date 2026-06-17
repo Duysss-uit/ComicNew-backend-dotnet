@@ -1,11 +1,9 @@
 using ComicNew.Application.DTOs.Users;
-using ComicNew.Domain.Entities;
 using ComicNew.Domain.Enums;
 namespace ComicNew.Application.DTOs.Stories
 {
-    public class StoryResponseDto
+    public class StoryResponseDto : BaseDto
     {
-        public Guid Id { get; set; }
         public int Views { get; set; }
         public double Rating { get; set; }
         public DateTime LastChapterAt { get; set; }
