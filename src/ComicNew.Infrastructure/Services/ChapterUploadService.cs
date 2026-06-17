@@ -10,7 +10,7 @@ namespace ComicNew.Infrastructure.Services;
 public class ChapterUploadService : IChapterUploadService
 {
     private readonly IStorageService _storageService;
-    public ChapterUploadService(IStorageService storageService, ChapterUploadResult chapterUploadResult)
+    public ChapterUploadService(IStorageService storageService)
     {
         _storageService = storageService;
     }
