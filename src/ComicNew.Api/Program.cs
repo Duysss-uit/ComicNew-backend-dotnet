@@ -93,7 +93,12 @@ builder.Services.AddScoped<IChapterService, ChapterService>();
 builder.Services.AddScoped<IChapterUploadService, ChapterUploadService>();
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
-
+builder.Services.AddControllers()
+.AddJsonOptions(options =>
+{
+    // Chuyển Enum thành String trong JSON response
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 
 var app = builder.Build();
 
