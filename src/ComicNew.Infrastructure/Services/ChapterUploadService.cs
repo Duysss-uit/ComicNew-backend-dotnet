@@ -10,12 +10,28 @@ namespace ComicNew.Infrastructure.Services;
 public class ChapterUploadService : IChapterUploadService
 {
     private readonly IStorageService _storageService;
+    private List<IFormFile> SortFilesNaturally(List<IFormFile> files)
+{
+    return files
+        .OrderBy(f =>
+        {
+            var nameWithoutExt = Path.GetFileNameWithoutExtension(f.FileName);
+            return int.TryParse(nameWithoutExt, out var num) ? num : int.MaxValue;
+        })
+        .ThenBy(f => f.FileName) 
+        .ToList();
+}
     public ChapterUploadService(IStorageService storageService)
     {
         _storageService = storageService;
     }
     async Task<List<string>> ComicUploadAsync(Guid storyId, int chapterNumber, string title, List<IFormFile> files, CancellationToken cancellationToken)
     {
+        if(files == null || files.Count == 0)
+        {
+            throw new NotSupportedException(("No files provided for comic chapter."));
+        }
+        files = SortFilesNaturally(files);
         var urls = new List<string>();
         foreach(var file in files)
         {
