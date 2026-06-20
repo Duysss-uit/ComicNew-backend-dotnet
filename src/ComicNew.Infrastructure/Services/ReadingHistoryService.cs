@@ -25,10 +25,17 @@ public class ReadingHistoryService : IReadingHistoryService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<List<ReadingHistory>> GetReadingHistoryByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<ReadingHistoryResponse>> GetReadingHistoryByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _db.ReadingHistories
+        var readingHistories = await _db.ReadingHistories
             .Where(rh => rh.UserId == userId)
             .ToListAsync(cancellationToken);
+
+        return readingHistories.Select(rh => new ReadingHistoryResponse
+        {
+            UserId = rh.UserId,
+            StoryId = rh.StoryId,
+            ChapterNumber = rh.ChapterNumber
+        }).ToList();
     }
 }
