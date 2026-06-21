@@ -95,4 +95,28 @@ public class StoryService : IStoryService
             }
         }).ToList();
     }
+    public async Task<List<StoryResponseDto>?> GetStoriesByAuthorIdAsync(Guid authorId, CancellationToken cancellationToken = default)
+    {
+        var author = await _db.Users.FindAsync(authorId);
+        if (author == null)        {
+            return null;
+        }
+        var stories = await _db.Stories.Where(s => s.AuthorId == authorId).OrderByDescending(s => s.CreatedAt).ToListAsync(cancellationToken);
+        return stories.Select(s => new StoryResponseDto
+        {
+            Id = s.Id,
+            Title = s.Title,
+            Description = s.Description,
+            CoverUrl = s.CoverUrl,
+            Tags = s.Tags,
+            Type = s.Type,
+            Status = s.Status,
+            Author = new AuthorDto
+            {
+                Id = author.Id,
+                FullName = author.FullName,
+                AvatarUrl = author.AvatarUrl
+            }
+        }).ToList();
+    }
 }

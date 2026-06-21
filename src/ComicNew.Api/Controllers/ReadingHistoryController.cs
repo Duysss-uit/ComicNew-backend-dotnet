@@ -21,7 +21,6 @@ namespace ComicNew.Api.Controllers{
             await _readingHistoryService.AddReadingHistoryAsync(request, cancellationToken);
             return Ok();
         }
-
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetReadingHistoryByUserId(Guid userId, CancellationToken cancellationToken)
         {

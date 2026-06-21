@@ -39,6 +39,24 @@ namespace ComicNew.Api.Controllers
                 return StatusCode(500, new { message = "An error occurred while fetching the story." });
             }
         }
+        [HttpGet("author/{authorId}")]
+        public async Task<IActionResult> GetStoriesByAuthor(Guid authorId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var stories = await _storyService.GetStoriesByAuthorIdAsync(authorId, cancellationToken);
+                if (stories == null)
+                {
+                    return NotFound();
+                }
+                return Ok(stories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching stories for author {AuthorId}", authorId);
+                return StatusCode(500, new { message = "An error occurred while fetching the stories." });
+            }
+        }
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateStory([FromForm]CreateStoryRequest request, IFormFile? coverFile, CancellationToken cancellationToken)
