@@ -22,6 +22,18 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Author:
+      type: object
+      properties:
+        Id:
+          type: string
+          format: uuid
+        FullName:
+          type: string
+          nullable: true
+        AvatarUrl:
+          type: string
+          nullable: true
     Story:
       type: object
       properties:
@@ -40,7 +52,8 @@ components:
             type: string
         Status:
           type: string
-          description: Giá trị chuỗi của StoryStatus, ví dụ Ongoing
+          enum: [Ongoing, Completed, Hiatus]
+          description: Giá trị enum StoryStatus
         Views:
           type: integer
           format: int32
@@ -52,7 +65,10 @@ components:
           format: date-time
         Type:
           type: string
-          description: Giá trị enum StoryType, ví dụ Comic
+          enum: [Comic, Novel]
+          description: Giá trị enum StoryType
+        Author:
+          $ref: '#/components/schemas/Author'
         AuthorId:
           type: string
           format: uuid
@@ -80,6 +96,8 @@ components:
         StoryId:
           type: string
           format: uuid
+        Story:
+          $ref: '#/components/schemas/Story'
         Content:
           type: string
           nullable: true
@@ -140,6 +158,40 @@ components:
             type: string
             format: binary
           description: Danh sách file trang truyện; backend upload và sinh ImageUrls/Content.
+    AddReadingHistoryRequest:
+      type: object
+      required:
+        - UserId
+        - StoryId
+        - ChapterNumber
+      properties:
+        UserId:
+          type: string
+          format: uuid
+        StoryId:
+          type: string
+          format: uuid
+        ChapterNumber:
+          type: integer
+          format: int32
+    ReadingHistoryResponse:
+      type: object
+      properties:
+        Id:
+          type: string
+          format: uuid
+        UserId:
+          type: string
+          format: uuid
+        StoryId:
+          type: string
+          format: uuid
+        ChapterNumber:
+          type: integer
+          format: int32
+        CreatedAt:
+          type: string
+          format: date-time
 
 paths:
   /api/auth/me:
