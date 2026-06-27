@@ -50,7 +50,7 @@ public class StoryService : IStoryService
 
     public async Task<StoryResponseDto?> GetStoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var story = await _db.Stories.FirstOrDefaultAsync(
+        var story = await _db.Stories.Include(s => s.Author).FirstOrDefaultAsync(
             s => s.Id == id,
             cancellationToken);
         if (story == null)
@@ -77,7 +77,7 @@ public class StoryService : IStoryService
 
     public async Task<List<StoryResponseDto>> GetStoriesAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        var stories = await _db.Stories.OrderByDescending(s => s.CreatedAt).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var stories = await _db.Stories.Include(s => s.Author).OrderByDescending(s => s.CreatedAt).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return stories.Select(s => new StoryResponseDto
         {
             Id = s.Id,
@@ -101,7 +101,7 @@ public class StoryService : IStoryService
         if (author == null)        {
             return null;
         }
-        var stories = await _db.Stories.Where(s => s.AuthorId == authorId).OrderByDescending(s => s.CreatedAt).ToListAsync(cancellationToken);
+        var stories = await _db.Stories.Include(s => s.Author).Where(s => s.AuthorId == authorId).OrderByDescending(s => s.CreatedAt).ToListAsync(cancellationToken);
         return stories.Select(s => new StoryResponseDto
         {
             Id = s.Id,
