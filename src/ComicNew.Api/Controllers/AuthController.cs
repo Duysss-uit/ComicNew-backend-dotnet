@@ -33,10 +33,9 @@ namespace ComicNew.Api.Controllers
                 _logger.LogWarning(ex, "User sync failed while handling /api/auth/me.");
             }
 
-            var userId = User.FindFirstValue("sub")
-                ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? syncedUser?.SupabaseUserId?.ToString()
-                ?? syncedUser?.Id.ToString();
+            var userId = syncedUser?.Id.ToString()
+                ?? User.FindFirstValue("sub")
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
             var email = User.FindFirstValue("email")
                 ?? User.FindFirstValue(ClaimTypes.Email)
                 ?? syncedUser?.Email;
