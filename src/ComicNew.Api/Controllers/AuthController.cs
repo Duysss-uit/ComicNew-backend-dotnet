@@ -34,7 +34,6 @@ namespace ComicNew.Api.Controllers
             }
 
             var userId = syncedUser?.Id.ToString()
-                ?? User.FindFirstValue("sub")
                 ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
             var email = User.FindFirstValue("email")
                 ?? User.FindFirstValue(ClaimTypes.Email)
