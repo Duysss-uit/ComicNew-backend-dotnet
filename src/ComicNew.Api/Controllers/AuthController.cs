@@ -32,18 +32,15 @@ namespace ComicNew.Api.Controllers
             {
                 _logger.LogWarning(ex, "User sync failed while handling /api/auth/me.");
             }
+            if(syncedUser == null)
+            {
+                _logger.LogWarning("User sync returned null while handling /api/auth/me.");
+            }
 
-            var userId = syncedUser?.Id.ToString()
-                ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var email = User.FindFirstValue("email")
-                ?? User.FindFirstValue(ClaimTypes.Email)
-                ?? syncedUser?.Email;
-            var role = User.FindFirstValue("role") ?? syncedUser?.Role;
-            var name = syncedUser?.FullName
-                ?? User.FindFirstValue("full_name")
-                ?? User.FindFirstValue("name")
-                ?? email?.Split('@')[0]
-                ?? "User";
+            var userId = syncedUser?.Id.ToString();
+            var email = syncedUser?.Email;
+            var role = syncedUser?.Role;
+            var name = syncedUser?.FullName?? "User";
 
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -58,7 +55,6 @@ namespace ComicNew.Api.Controllers
                 Role = role,
                 Name = name,
                 AvatarUrl = syncedUser?.AvatarUrl,
-                Claims = claims
             });
             
         }
