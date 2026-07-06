@@ -12,7 +12,6 @@ public class ReadingHistoryService : IReadingHistoryService
     {
         _db = db;
     }
-
     public async Task AddReadingHistoryAsync(AddReadingHistoryRequest request, CancellationToken cancellationToken = default)
     {
         var existing = await _db.ReadingHistories

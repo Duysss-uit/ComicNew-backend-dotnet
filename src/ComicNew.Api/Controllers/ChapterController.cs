@@ -70,6 +70,7 @@ namespace ComicNew.Api.Controllers
                 {
                     return NotFound(new { message = "Chapter not found." });
                 }
+                await _chapterService.IncreaseView(storyId);
                 return Ok(chapter);
             }
             catch(Exception ex)

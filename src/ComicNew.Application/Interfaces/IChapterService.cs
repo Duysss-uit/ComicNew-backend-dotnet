@@ -7,4 +7,5 @@ public interface IChapterService
     Task<List<ChapterResponseDto>> GetChapterByStoryIdAsync(Guid storyId, CancellationToken cancellationToken = default);
     Task<ChapterResponseDto> CreateChapterAsync(CreateChapterRequest request, CancellationToken cancellationToken = default);
     Task DeleteChapterAsync(Guid id, CancellationToken cancellationToken = default);
+    Task IncreaseView(Guid storyId, CancellationToken cancellationToken = default);
 }

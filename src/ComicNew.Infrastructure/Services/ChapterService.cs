@@ -12,6 +12,17 @@ public class ChapterService : IChapterService
     {
         _db = db;
     }
+    public async Task IncreaseView(Guid storyId, CancellationToken cancellationToken = default)
+    {
+        var story = await _db.Stories.FindAsync(new object[] { storyId }, cancellationToken);
+        if (story == null)
+        {
+            throw new Exception("Story not found");
+        }
+        story.Views++;
+        _db.Stories.Update(story);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
     public async Task<ChapterResponseDto> CreateChapterAsync(CreateChapterRequest request, CancellationToken cancellationToken = default)
     {
         var newChapter = new Chapter
