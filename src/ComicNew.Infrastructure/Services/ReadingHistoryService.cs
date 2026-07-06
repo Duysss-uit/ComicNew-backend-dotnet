@@ -15,6 +15,15 @@ public class ReadingHistoryService : IReadingHistoryService
 
     public async Task AddReadingHistoryAsync(AddReadingHistoryRequest request, CancellationToken cancellationToken = default)
     {
+        var existing = await _db.ReadingHistories
+            .FirstOrDefaultAsync(rh => rh.UserId == request.UserId && rh.StoryId == request.StoryId, cancellationToken);
+        if(existing != null)
+        {
+            existing.ChapterNumber = request.ChapterNumber;
+            _db.ReadingHistories.Update(existing);
+            await _db.SaveChangesAsync(cancellationToken);
+            return;
+        }
         var readingHistory = new ReadingHistory
         {
             UserId = request.UserId,

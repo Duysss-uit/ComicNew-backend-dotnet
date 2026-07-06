@@ -40,6 +40,12 @@ components:
         Id:
           type: string
           format: uuid
+        CreatedAt:
+          type: string
+          format: date-time
+        UpdatedAt:
+          type: string
+          format: date-time
         Title:
           type: string
         Description:
@@ -52,8 +58,8 @@ components:
             type: string
         Status:
           type: string
-          enum: [Ongoing, Completed, Hiatus]
-          description: Giá trị enum StoryStatus
+          enum: [Ongoing, Completed, Suspended]
+          description: Trạng thái của truyện (StoryStatus)
         Views:
           type: integer
           format: int32
@@ -66,18 +72,21 @@ components:
         Type:
           type: string
           enum: [Comic, Novel]
-          description: Giá trị enum StoryType
+          description: Thể loại truyện (StoryType)
         Author:
           $ref: '#/components/schemas/Author'
-        AuthorId:
-          type: string
-          format: uuid
     Chapter:
       type: object
       properties:
         Id:
           type: string
           format: uuid
+        CreatedAt:
+          type: string
+          format: date-time
+        UpdatedAt:
+          type: string
+          format: date-time
         Title:
           type: string
         ChapterNumber:
@@ -123,24 +132,17 @@ components:
           example: Comic
         Status:
           type: string
-          enum: [Ongoing, Completed, Hiatus]
+          enum: [Ongoing, Completed, Suspended]
           example: Ongoing
         coverFile:
           type: string
           format: binary
           description: File cover tuỳ chọn; backend sẽ upload và gán CoverUrl.
-        chapterFiles:
-          type: array
-          items:
-            type: string
-            format: binary
-          description: Trường hiện được controller nhận nhưng chưa dùng để tạo chapter.
     CreateChapterForm:
       type: object
       required:
         - Title
         - ChapterNumber
-        - StoryId
       properties:
         Title:
           type: string
@@ -152,6 +154,7 @@ components:
         StoryId:
           type: string
           format: uuid
+          description: ID của truyện (nếu gửi qua form phải khớp với storyId trên path, hoặc để trống).
         files:
           type: array
           items:
@@ -190,6 +193,9 @@ components:
           type: integer
           format: int32
         CreatedAt:
+          type: string
+          format: date-time
+        UpdatedAt:
           type: string
           format: date-time
 
@@ -235,17 +241,15 @@ paths:
                   AvatarUrl:
                     type: string
                     nullable: true
-                  Claims:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        Type:
-                          type: string
-                        Value:
-                          type: string
         '401':
-          description: Unauthorized — token missing or invalid
+          description: Unauthorized — token missing, invalid, or does not contain a valid user id.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
   /api/stories:
     get:
@@ -282,7 +286,7 @@ paths:
       description: |
         Endpoint tạo truyện mới, yêu cầu đăng nhập. Gửi dưới dạng `multipart/form-data`.
 
-        Frontend thường truyền `Title`, `Description`, `Tags`, `Type`, `Status` và có thể kèm `coverFile`.
+        Frontend truyền `Title`, `Description`, `Tags`, `Type`, `Status` (trong request body form) và có thể kèm `coverFile` dưới dạng binary.
         Backend sẽ upload `coverFile` lên storage nếu có và tự gán `CoverUrl`.
       security:
         - bearerAuth: []
@@ -294,13 +298,13 @@ paths:
               $ref: '#/components/schemas/CreateStoryForm'
       responses:
         '201':
-          description: Truyện đã được tạo
+          description: Truyện đã được tạo thành công
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Story'
         '401':
-          description: Unauthorized — token missing or invalid
+          description: Unauthorized — token missing hoặc invalid
         '500':
           description: Lỗi server khi tạo truyện
 
@@ -328,7 +332,56 @@ paths:
         '500':
           description: Lỗi server khi lấy truyện
 
+  /api/stories/author/{authorId}:
+    get:
+      summary: Lấy danh sách truyện của tác giả
+      description: Trả về danh sách truyện được tạo bởi một tác giả cụ thể theo `authorId`.
+      parameters:
+        - in: path
+          name: authorId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID của tác giả
+      responses:
+        '200':
+          description: Danh sách truyện của tác giả
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Story'
+        '404':
+          description: Không tìm thấy truyện hoặc tác giả
+        '500':
+          description: Lỗi server khi lấy danh sách truyện
+
   /api/stories/{storyId}/chapters:
+    get:
+      summary: Lấy danh sách chapter theo truyện
+      description: Trả về danh sách chapter của truyện.
+      operationId: GetChaptersByStory
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Story id từ base route `api/stories/{storyId}/chapters`.
+      responses:
+        '200':
+          description: Danh sách chapter của truyện
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chapter'
+        '500':
+          description: Lỗi server khi lấy danh sách chapter
     post:
       summary: Upload chapter mới cho truyện
       description: |
@@ -337,9 +390,8 @@ paths:
         Luồng xử lý trong controller:
         1. Đồng bộ/lấy user hiện tại từ token.
         2. Dùng `storyId` trên URL làm nguồn sự thật cho truyện.
-        3. Kiểm tra quyền author.
+        3. Kiểm tra quyền author (chỉ tác giả truyện mới được đăng chapter).
         4. Upload file trang truyện và tạo chapter.
-
       operationId: UploadChapter
       security:
         - bearerAuth: []
@@ -359,15 +411,24 @@ paths:
               $ref: '#/components/schemas/CreateChapterForm'
       responses:
         '201':
-          description: Chapter đã được tạo
+          description: Chapter đã được tạo thành công
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Chapter'
+        '400':
+          description: Yêu cầu không hợp lệ (ví dụ StoryId trong form không khớp với URL)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
         '401':
-          description: Unauthorized — token missing or invalid
+          description: Unauthorized — token missing hoặc invalid
         '403':
-          description: Người dùng không có quyền upload chapter cho truyện này
+          description: Người dùng không có quyền upload chapter cho truyện này (không phải tác giả)
         '404':
           description: Không tìm thấy truyện
         '500':
@@ -401,12 +462,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Chapter'
         '404':
-          description: Không tìm thấy chapter
+          description: Không tìm thấy chapter hoặc truyện
         '500':
           description: Lỗi server khi lấy chapter
     delete:
       summary: Xoá chapter
-      description: Xoá chapter theo `chapterId`. Yêu cầu đăng nhập và chỉ author của truyện mới được xoá.
+      description: Xoá chapter theo `chapterId`. Yêu cầu đăng nhập và chỉ tác giả của truyện mới được xoá.
       operationId: DeleteChapter
       security:
         - bearerAuth: []
@@ -427,42 +488,65 @@ paths:
           description: Id chapter.
       responses:
         '204':
-          description: Chapter đã được xoá
+          description: Chapter đã được xoá thành công
         '401':
-          description: Unauthorized — token missing or invalid
+          description: Unauthorized — token missing hoặc invalid
         '403':
-          description: Người dùng không có quyền xoá chapter này
+          description: Người dùng không có quyền xoá chapter này (không phải tác giả)
         '404':
           description: Không tìm thấy chapter hoặc truyện
         '500':
           description: Lỗi server khi xoá chapter
 
-  /api/stories/{storyId}/chapters:
-    get:
-      summary: Lấy danh sách chapter theo truyện
+  /api/user/reading-history:
+    post:
+      summary: Thêm hoặc cập nhật lịch sử đọc
       description: |
-        Trả về danh sách chapter của truyện.
-        Tương ứng với action `[HttpGet]` trong `ChapterController`.
-      operationId: GetChaptersByStory
+        Thêm hoặc cập nhật lịch sử đọc của người dùng đối với một chương truyện nhất định.
+        Yêu cầu đăng nhập.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddReadingHistoryRequest'
+      responses:
+        '200':
+          description: Đã lưu lịch sử đọc thành công
+        '401':
+          description: Unauthorized — token missing hoặc invalid
+        '500':
+          description: Lỗi server khi thêm lịch sử đọc
+
+  /api/user/reading-history/{userId}:
+    get:
+      summary: Lấy lịch sử đọc của người dùng
+      description: Trả về danh sách lịch sử đọc của người dùng cụ thể. Yêu cầu đăng nhập.
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
-          name: storyId
+          name: userId
           required: true
           schema:
             type: string
             format: uuid
-          description: Story id từ base route `api/stories/{storyId}/chapters`.
+          description: ID của người dùng cần lấy lịch sử đọc
       responses:
         '200':
-          description: Danh sách chapter của truyện
+          description: Danh sách lịch sử đọc
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Chapter'
+                  $ref: '#/components/schemas/ReadingHistoryResponse'
+        '401':
+          description: Unauthorized — token missing hoặc invalid
         '500':
-          description: Lỗi server khi lấy danh sách chapter
+          description: Lỗi server khi lấy lịch sử đọc
 
   /api/health:
     get:
@@ -491,6 +575,6 @@ x-notes: |
   - Middleware JwtBearer lấy metadata từ Supabase (`Supabase:Url`) để xác thực token.
   - `OnTokenValidated` trong `Program.cs` gọi `IUserSyncService.GetOrCreateUserAsync` để đảm bảo user tồn tại trong DB.
   - Nếu bạn muốn chặn request khi sync user thất bại: trong `OnTokenValidated` gọi `context.Fail("reason")`.
-  - `POST /api/stories` nhận multipart form; `coverFile` là tuỳ chọn, còn `chapterFiles` hiện được action nhận nhưng chưa dùng trong logic tạo truyện.
-  - `POST /api/stories/{storyId}/chapters` cần `Title`, `ChapterNumber`, `StoryId` và danh sách file trang truyện trong field `files`.
+  - `POST /api/stories` nhận multipart form; `coverFile` là tuỳ chọn.
+  - `POST /api/stories/{storyId}/chapters` cần `Title`, `ChapterNumber`, `StoryId` (tuỳ chọn) và danh sách file trang truyện trong field `files`.
   - `storyId` trên URL là nguồn sự thật cho chapter routes; form body nếu có `StoryId` sẽ được kiểm tra khớp với route.
