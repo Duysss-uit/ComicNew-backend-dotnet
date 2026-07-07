@@ -164,13 +164,9 @@ components:
     AddReadingHistoryRequest:
       type: object
       required:
-        - UserId
         - StoryId
         - ChapterNumber
       properties:
-        UserId:
-          type: string
-          format: uuid
         StoryId:
           type: string
           format: uuid
@@ -520,20 +516,12 @@ paths:
         '500':
           description: Lỗi server khi thêm lịch sử đọc
 
-  /api/user/reading-history/{userId}:
+  /api/user/reading-history:
     get:
       summary: Lấy lịch sử đọc của người dùng
-      description: Trả về danh sách lịch sử đọc của người dùng cụ thể. Yêu cầu đăng nhập.
+      description: Trả về danh sách lịch sử đọc của người dùng hiện tại dựa trên JWT token. Yêu cầu đăng nhập.
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: ID của người dùng cần lấy lịch sử đọc
       responses:
         '200':
           description: Danh sách lịch sử đọc
