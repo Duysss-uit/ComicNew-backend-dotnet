@@ -176,24 +176,17 @@ components:
     ReadingHistoryResponse:
       type: object
       properties:
-        Id:
-          type: string
-          format: uuid
         UserId:
-          type: string
-          format: uuid
-        StoryId:
           type: string
           format: uuid
         ChapterNumber:
           type: integer
           format: int32
-        CreatedAt:
+        LastReadAt:
           type: string
           format: date-time
-        UpdatedAt:
-          type: string
-          format: date-time
+        Story:
+          $ref: '#/components/schemas/Story'
 
 paths:
   /api/auth/me:

@@ -7,10 +7,12 @@ namespace ComicNew.Infrastructure.Services;
 public class ReadingHistoryService : IReadingHistoryService
 {
     private readonly AppDbContext _db;
+    private readonly IStoryService _storyService;
 
-    public ReadingHistoryService(AppDbContext db)
+    public ReadingHistoryService(AppDbContext db, IStoryService storyService)
     {
         _db = db;
+        _storyService = storyService;
     }
     public async Task AddReadingHistoryAsync(AddReadingHistoryRequest request, CancellationToken cancellationToken = default)
     {
@@ -37,13 +39,28 @@ public class ReadingHistoryService : IReadingHistoryService
     {
         var readingHistories = await _db.ReadingHistories
             .Where(rh => rh.UserId == userId)
+            .OrderByDescending(rh => rh.UpdatedAt)
             .ToListAsync(cancellationToken);
 
-        return readingHistories.Select(rh => new ReadingHistoryResponse
+        var responseList = new List<ReadingHistoryResponse>();
+
+        foreach (var rh in readingHistories)
         {
-            UserId = rh.UserId,
-            StoryId = rh.StoryId,
-            ChapterNumber = rh.ChapterNumber
-        }).ToList();
+            var story = await _storyService.GetStoryByIdAsync(rh.StoryId, cancellationToken);
+            if (story == null)
+            {
+                continue;
+            }
+
+            responseList.Add(new ReadingHistoryResponse
+            {
+                UserId = rh.UserId,
+                ChapterNumber = rh.ChapterNumber,
+                LastReadAt = rh.UpdatedAt,
+                Story = story
+            });
+        }
+
+        return responseList;
     }
 }
