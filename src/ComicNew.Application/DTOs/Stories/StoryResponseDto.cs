@@ -11,7 +11,7 @@ namespace ComicNew.Application.DTOs.Stories
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string CoverUrl { get; set; } = string.Empty;
-        public string[] Tags { get; set; } = [];
+        public List<ComicNew.Application.DTOs.Tags.TagDto> Tags { get; set; } = new();
         public string Status { get; set; } = StoryStatus.Ongoing.ToString();
         public StoryType Type { get; set; } = StoryType.Comic;
         AuthorDto authorDto {get; set;} = new AuthorDto();

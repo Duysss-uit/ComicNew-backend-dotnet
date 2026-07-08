@@ -10,7 +10,7 @@ public class Story : BaseEntity
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string CoverUrl { get; set; } = string.Empty;
-    public string[] Tags { get; set; } = [];
+    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
     public string Status { get; set; } = StoryStatus.Ongoing.ToString();
     public int Views { get; set; }
     public double Rating { get; set; }

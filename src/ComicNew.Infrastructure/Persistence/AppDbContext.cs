@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Chapter> Chapters { get; set; } = null!;
     public DbSet<ReadingHistory> ReadingHistories { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    public DbSet<Tag> Tags { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

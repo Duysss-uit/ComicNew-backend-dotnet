@@ -21,9 +21,7 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
         builder.Property(s => s.CoverUrl)
             .HasMaxLength(2048);
 
-        builder.Property(s => s.Tags)
-            .HasColumnType("text[]");
-            
+
         builder.Property(s => s.Status)
             .IsRequired()
             .HasConversion<string>();

@@ -88,6 +88,7 @@ builder.Services.AddSingleton<Supabase.Client>(provider =>
         AutoConnectRealtime = false
     });
 });
+builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IChapterService, ChapterService>();
 builder.Services.AddScoped<IChapterUploadService, ChapterUploadService>();
