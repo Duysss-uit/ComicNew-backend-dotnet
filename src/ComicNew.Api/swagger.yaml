@@ -22,6 +22,16 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Tag:
+      type: object
+      properties:
+        Id:
+          type: string
+          format: uuid
+        Name:
+          type: string
+        Slug:
+          type: string
     Author:
       type: object
       properties:
@@ -55,7 +65,7 @@ components:
         Tags:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/Tag'
         Status:
           type: string
           enum: [Ongoing, Completed, Suspended]
@@ -121,11 +131,12 @@ components:
         Description:
           type: string
           example: Hành trình của Luffy đi tìm kho báu One Piece.
-        Tags:
+        TagIds:
           type: array
           items:
             type: string
-          example: ["shonen", "adventure", "pirate"]
+            format: uuid
+          example: ["00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002"]
         Type:
           type: string
           enum: [Comic, Novel]
@@ -189,6 +200,133 @@ components:
           $ref: '#/components/schemas/Story'
 
 paths:
+  /api/tags:
+    get:
+      summary: Lấy danh sách tags
+      description: Trả về toàn bộ danh sách tag hiện có trong hệ thống.
+      responses:
+        '200':
+          description: Danh sách tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '500':
+          description: Lỗi server
+    post:
+      summary: Tạo tag mới
+      description: API yêu cầu quyền Admin để tạo tag. Tự động sinh Slug nếu không được cấp.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - Name
+              properties:
+                Name:
+                  type: string
+                  example: "Phiêu Lưu"
+                Slug:
+                  type: string
+                  example: "phieu-luu"
+                  nullable: true
+      responses:
+        '201':
+          description: Đã tạo tag thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Không phải Admin)
+        '500':
+          description: Lỗi server
+
+  /api/tags/{id}:
+    get:
+      summary: Lấy chi tiết tag
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Thông tin tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '404':
+          description: Không tìm thấy
+    put:
+      summary: Cập nhật tag
+      description: Yêu cầu quyền Admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - Name
+                - Slug
+              properties:
+                Name:
+                  type: string
+                Slug:
+                  type: string
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Không phải Admin)
+        '404':
+          description: Không tìm thấy
+    delete:
+      summary: Xóa tag
+      description: Yêu cầu quyền Admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Đã xóa thành công
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Không phải Admin)
+        '404':
+          description: Không tìm thấy
+
+
   /api/auth/me:
     get:
       summary: Lấy thông tin user hiện tại
