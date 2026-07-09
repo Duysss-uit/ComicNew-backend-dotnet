@@ -6,4 +6,5 @@ public interface IStoryService
     Task<StoryResponseDto?> GetStoryByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<List<StoryResponseDto>?> GetStoriesByAuthorIdAsync(Guid authorId, CancellationToken cancellationToken = default);
     Task<List<StoryResponseDto>> GetStoriesAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<List<StoryResponseDto>> SearchStoriesAsync(string query, int matchCount = 10, CancellationToken cancellationToken = default);
 }

@@ -9,9 +9,12 @@ namespace ComicNew.Infrastructure.Services;
 public class StoryService : IStoryService
 {
     private readonly AppDbContext _db;
-    public StoryService(AppDbContext db)
+    private readonly IEmbeddingService _embeddingService;
+
+    public StoryService(AppDbContext db, IEmbeddingService embeddingService)
     {
         _db = db;
+        _embeddingService = embeddingService;
     }
     public async Task<StoryResponseDto> CreateStoryAsync(CreateStoryRequest request, Guid authorId, CancellationToken cancellationToken = default)
     {
@@ -31,6 +34,19 @@ public class StoryService : IStoryService
         {
             var tags = await _db.Tags.Where(t => request.TagIds.Contains(t.Id)).ToListAsync(cancellationToken);
             newStory.Tags = tags;
+        }
+
+        try 
+        {
+            var textToEmbed = $"{newStory.Title} {newStory.Description}";
+            var embedding = await _embeddingService.GenerateEmbeddingAsync(textToEmbed, cancellationToken);
+            newStory.Embedding = new Pgvector.Vector(embedding);
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't fail story creation if embedding fails
+            // Depending on the requirement, you might want to retry later or throw
+            Console.WriteLine($"Failed to generate embedding: {ex.Message}");
         }
 
         _db.Stories.Add(newStory);
@@ -122,6 +138,47 @@ public class StoryService : IStoryService
                 Id = author.Id,
                 FullName = author.FullName ?? string.Empty,
                 AvatarUrl = author.AvatarUrl ?? string.Empty
+            }
+        }).ToList();
+    }
+
+    public async Task<List<StoryResponseDto>> SearchStoriesAsync(string query, int matchCount = 10, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return new List<StoryResponseDto>();
+        }
+
+        // Generate embedding for the search query
+        var queryEmbedding = await _embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
+        var pgvectorEmbedding = new Pgvector.Vector(queryEmbedding);
+
+        // Execute Hybrid Search via raw SQL
+        var stories = await _db.Stories
+            .FromSqlRaw(
+                "SELECT * FROM hybrid_search_stories({0}, {1}, {2})",
+                query,
+                pgvectorEmbedding,
+                matchCount
+            )
+            .Include(s => s.Author)
+            .Include(s => s.Tags)
+            .ToListAsync(cancellationToken);
+
+        return stories.Select(s => new StoryResponseDto
+        {
+            Id = s.Id,
+            Title = s.Title,
+            Description = s.Description,
+            CoverUrl = s.CoverUrl,
+            Tags = s.Tags.Select(t => new TagDto { Id = t.Id, Name = t.Name, Slug = t.Slug }).ToList(),
+            Type = s.Type,
+            Status = s.Status,
+            Author = new AuthorDto
+            {
+                Id = s.AuthorId,
+                FullName = s.Author?.FullName ?? string.Empty,
+                AvatarUrl = s.Author?.AvatarUrl ?? string.Empty
             }
         }).ToList();
     }

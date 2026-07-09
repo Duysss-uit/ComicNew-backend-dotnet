@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), o => o.UseVector()));
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 var supabaseUrl = builder.Configuration["Supabase:Url"];
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -95,6 +95,7 @@ builder.Services.AddScoped<IChapterUploadService, ChapterUploadService>();
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 builder.Services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
+builder.Services.AddHttpClient<IEmbeddingService, OpenRouterEmbeddingService>();
 builder.Services.AddControllers()
 .AddJsonOptions(options =>
 {

@@ -37,6 +37,16 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
         builder.Property(s => s.Rating)
             .HasDefaultValue(0.0);
 
+        builder.Property(s => s.Embedding)
+            .HasColumnType("vector");
+
+        builder.HasGeneratedTsVectorColumn(
+            s => s.SearchVector,
+            "english",  // or "simple" for multi-language
+            s => new { s.Title, s.Description })
+            .HasIndex(s => s.SearchVector)
+            .HasMethod("GIN");
+
         builder.HasIndex(s => s.Title);
         builder.HasIndex(s => s.AuthorId);
 

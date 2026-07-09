@@ -92,5 +92,19 @@ namespace ComicNew.Api.Controllers
                 return StatusCode(500, new { message = "An error occurred while fetching the stories." });
             }
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchStories([FromQuery] string query, [FromQuery] int matchCount = 10, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var stories = await _storyService.SearchStoriesAsync(query, matchCount, cancellationToken);
+                return Ok(stories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching stories with query {Query}", query);
+                return StatusCode(500, new { message = "An error occurred while searching the stories." });
+            }
+        }
     }
 }
