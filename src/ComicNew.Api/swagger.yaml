@@ -435,6 +435,38 @@ paths:
         '500':
           description: Lỗi server khi tạo truyện
 
+  /api/stories/search:
+    get:
+      summary: Tìm kiếm truyện (Hybrid Search)
+      description: |
+        Tìm kiếm truyện bằng phương pháp Hybrid Search, kết hợp giữa tìm kiếm toàn văn bản (Full-Text Search) 
+        và tìm kiếm theo ngữ nghĩa (Semantic Search - bằng Vector).
+        Có thể sử dụng cho Search Bar tạm thời (ví dụ: matchCount=5) hoặc Trang tìm kiếm đầy đủ (ví dụ: matchCount=20).
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          description: Từ khóa tìm kiếm (Ví dụ "xuyên không", "tu tiên")
+        - in: query
+          name: matchCount
+          schema:
+            type: integer
+            default: 10
+          description: Số lượng kết quả tối đa trả về
+      responses:
+        '200':
+          description: Kết quả tìm kiếm
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Story'
+        '500':
+          description: Lỗi server khi tìm kiếm
+
   /api/stories/{storyId}:
     get:
       summary: Lấy chi tiết truyện
