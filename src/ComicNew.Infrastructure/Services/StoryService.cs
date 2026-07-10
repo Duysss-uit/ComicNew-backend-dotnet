@@ -153,13 +153,15 @@ public class StoryService : IStoryService
         var queryEmbedding = await _embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
         var pgvectorEmbedding = new Pgvector.Vector(queryEmbedding);
 
-        // Execute Hybrid Search via raw SQL
+        // Execute Hybrid Search via raw SQL, prioritizing full-text search (weight 2.0 vs semantic weight 1.0)
         var stories = await _db.Stories
             .FromSqlRaw(
-                "SELECT * FROM hybrid_search_stories({0}, {1}, {2})",
+                "SELECT * FROM hybrid_search_stories({0}, {1}, {2}, {3}, {4})",
                 query,
                 pgvectorEmbedding,
-                matchCount
+                matchCount,
+                2.0, // full_text_weight
+                1.0  // semantic_weight
             )
             .Include(s => s.Author)
             .Include(s => s.Tags)
