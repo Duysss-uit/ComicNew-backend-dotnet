@@ -38,7 +38,8 @@ public class StoryService : IStoryService
 
         try 
         {
-            var textToEmbed = $"{newStory.Title} {newStory.Description}";
+            var tagNames = string.Join(" ", newStory.Tags.Select(t => t.Name));
+            var textToEmbed = $"{newStory.Title} {newStory.Description} {tagNames}".Trim();
             var embedding = await _embeddingService.GenerateEmbeddingAsync(textToEmbed, cancellationToken);
             newStory.Embedding = new Pgvector.Vector(embedding);
         }
